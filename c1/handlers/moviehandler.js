@@ -1,5 +1,5 @@
 const Movie = require('../pkg/movies/movieSchema');
-
+//123
 exports.getAll = async (req, res) => {
   try {
     let movies = await Movie.find();
