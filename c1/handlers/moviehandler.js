@@ -2,6 +2,7 @@ const Movie = require('../pkg/movies/movieSchema');
 //123
 exports.getAll = async (req, res) => {
   try {
+    console.log(req.aleksandar);
     let movies = await Movie.find();
     res.status(200).json({
       status: 'success',

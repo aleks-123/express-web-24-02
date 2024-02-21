@@ -2,6 +2,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../pkg/users/userSchema');
 const bcrypt = require('bcryptjs');
+const { promisify } = require('util');
 
 exports.signup = async (req, res) => {
   try {
@@ -92,6 +93,51 @@ exports.login = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+    return res.status(500).send('Internal server error');
+  }
+};
+
+exports.protect = async (req, res, next) => {
+  try {
+    // 1) Go zemame tokenot i proveruvame dali e tamu
+
+    let token;
+
+    if (req.headers.authorization) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+    if (!token) {
+      return res.status(500).send('You are not logged in! please log in');
+    }
+
+    // function verifyToken(token) {
+    //   return new Promise((resolve, reject) => {
+    //     jwt.verify(token, process.env.JWT_SECRET, (err, decodedtoken) => {
+    //       if (err) {
+    //         reject(new Error('Token verification failed'));
+    //       } else {
+    //         resolve(decodedToken);
+    //       }
+    //     });
+    //   });
+    // }
+
+    //!
+    // const verifyAsync = promisify(jwt.verify);
+    // const decoded = await verifyAsync(token, process.env.JWT_SECRET);
+    //!
+
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+    // 3) Proveruvame dali koisnikot posti
+    const userTrue = await User.findById(decoded.id);
+    if (!userTrue) {
+      return res.status(401).send('User doesnt longer exist');
+    }
+
+    req.user = userTrue;
+    next();
+  } catch (err) {
     return res.status(500).send('Internal server error');
   }
 };
