@@ -135,9 +135,18 @@ exports.protect = async (req, res, next) => {
       return res.status(401).send('User doesnt longer exist');
     }
 
-    req.user = userTrue;
+    req.auth = userTrue;
     next();
   } catch (err) {
     return res.status(500).send('Internal server error');
   }
+};
+
+exports.restrict = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.auth.role)) {
+      return res.status(500).send('You dont have access');
+    }
+    next();
+  };
 };

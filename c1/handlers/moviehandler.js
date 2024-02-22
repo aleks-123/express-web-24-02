@@ -83,3 +83,30 @@ exports.delete = async (req, res) => {
     res.status(404).json({ status: 'fail', message: err });
   }
 };
+
+exports.createByUser = async (req, res, next) => {
+  try {
+    const moviePost = await Movie.create({
+      title: req.body.title,
+      year: req.body.year,
+      genre: req.body.genre,
+      author: req.auth.id,
+    });
+
+    res.status(201).json(moviePost);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getByUser = async (req, res) => {
+  try {
+    const userId = req.auth.id;
+
+    const mineMovies = await Movie.find({ author: userId });
+
+    res.status(201).json(mineMovies);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

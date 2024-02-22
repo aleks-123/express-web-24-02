@@ -7,7 +7,6 @@ const movieSchema = new mongoose.Schema({
     trim: true, // trim gi brishe praznite mesta
     minlength: 1,
     maxlength: [255, 'Naslovot e preolg'],
-    unique: [true, 'Mora da ima razlicen naslov od vekje posteckiot'],
   },
   year: {
     type: Number,
@@ -21,6 +20,10 @@ const movieSchema = new mongoose.Schema({
   slika: {
     type: String,
     default: 'default.jpg',
+  },
+  author: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
   },
 });
 

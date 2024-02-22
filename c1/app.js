@@ -20,14 +20,40 @@ app.use(express.json());
 
 db.init();
 
+app.use(
+  jwt
+    .expressjwt({
+      algorithms: ['HS256'],
+      secret: process.env.JWT_SECRET,
+      getToken: (req) => {
+        if (
+          req.headers.authorization &&
+          req.headers.authorization.split(' ')[0] === 'Bearer'
+        ) {
+          return req.headers.authorization.split(' ')[1];
+        }
+        if (req.cookies.jwt) {
+          return req.cookies.jwt;
+        }
+        return null; //Vo ovaj slucaj ako nemame isprateno token
+      },
+    })
+    .unless({
+      path: ['/api/v1/signup', '/api/v1/login', '/movies/:id'],
+    })
+);
+
 app.post('/api/v1/signup', auth.signup);
 app.post('/api/v1/login', auth.login);
 
-app.get('/movies', auth.protect, movies.getAll);
+app.get('/movies', movies.getAll);
 app.get('/movies/:id', movies.getOne);
 app.post('/movies', movies.create);
 app.patch('/movies/:id', movies.update);
 app.delete('/movies/:id', movies.delete);
+
+app.post('/me', movies.createByUser);
+app.get('/me', movies.getByUser);
 
 app.listen(process.env.PORT, (err) => {
   if (err) {
