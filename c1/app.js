@@ -91,4 +91,29 @@ app.listen(process.env.PORT, (err) => {
 
 //! DA SE KREIRA TVITER APLIKACIJA KOJA STO KORISNICITE KJE MOZAT DA KREIRAAT SOPSTVENI POSTOVI
 //! DA IMA NEWFEED RUTA KOJA KJE SE PRIKAZUVAAT SITE TVITA
-//! I HOME RUTA DA SE PRIKAZUVAAT SAMO TVITOVITE OD LOGIRANITE KORISNITE
+
+// 1xx Informativen karakter
+// 100 - continue
+// 101 - switching protocols
+
+// 2xx - Uspesni odgovori
+// 200 - ok: Standarden odgovor za uspesni http baranja
+// 201 - Created: Baranjeto e uspesno i kako rezultat bilo kreiran nov zapis
+// 204 - No content: Baranjeto e uspesno, no nema sodrzina za vrakjanje nazad
+
+// 3xx: Prenasocuvanja
+// 301 - Moved Pemranently - Se koristi koga URL adresata na resursot se promeni
+// 302 - found: se koristi za privremeno prenasocuvanje
+// 304 - Not modified - Ne informira deka keshiranata verzija na baraniot resurs e uste validna
+
+// 4xx: Greski na klientot
+// 400 Bad request: Baranjeto ne moze da e obraboteno poradi sintaksicka greska
+// 401: Unauthorized: Za pristap na ovaj resurs e potrebna avtentikacija
+// 403: Forbidden: Serverot go razbira baranjeto, no odbiva da odgovori na istoto
+// 404: not found: Serverit nemoze da go najde baraniot resurs
+// 429: Too many request: Klientot ispratil premnogu baranja vo daden vremenski period
+
+//5xx: Greski na serverot
+// 500 Internal Server Error: Opsta greska koga serverot se soocil so situacija koja nemoze da ja obraboti
+// 501: Not implemented: Ne e seushte implementirana funkcionalnosta za zadadenite baranja
+// 503: Service Unavailable: Serverot vo momentot ne e dostapen
