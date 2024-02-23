@@ -11,9 +11,12 @@ const db = require('./pkg/db/index');
 
 const movies = require('./handlers/moviehandler');
 const auth = require('./handlers/authHandler');
+const viewHanlder = require('./handlers/viewHandler');
 
 const app = express();
 
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -39,7 +42,7 @@ app.use(
       },
     })
     .unless({
-      path: ['/api/v1/signup', '/api/v1/login', '/movies/:id'],
+      path: ['/api/v1/signup', '/api/v1/login', '/movies/:id', '/login'],
     })
 );
 
@@ -54,6 +57,10 @@ app.delete('/movies/:id', movies.delete);
 
 app.post('/me', movies.createByUser);
 app.get('/me', movies.getByUser);
+
+// View ruti
+app.get('/login', viewHanlder.getLoginForm);
+app.get('/viewMovies', viewHanlder.movieView);
 
 app.listen(process.env.PORT, (err) => {
   if (err) {
