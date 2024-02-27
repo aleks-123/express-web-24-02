@@ -54,6 +54,11 @@ app.get('/movies/:id', movies.getOne);
 app.post('/movies', movies.create);
 app.patch('/movies/:id', movies.update);
 app.delete('/movies/:id', movies.delete);
+app.put('/movies/:id', movies.replace);
+// Agregacki ruti
+app.get('/averageYear', movies.averageYear);
+app.get('/totalYear', movies.totalYear);
+app.get('/numberPerGenre', movies.numberPerGenre);
 
 app.post('/me', movies.createByUser);
 app.get('/me', movies.getByUser);
@@ -124,3 +129,36 @@ app.listen(process.env.PORT, (err) => {
 // 500 Internal Server Error: Opsta greska koga serverot se soocil so situacija koja nemoze da ja obraboti
 // 501: Not implemented: Ne e seushte implementirana funkcionalnosta za zadadenite baranja
 // 503: Service Unavailable: Serverot vo momentot ne e dostapen
+
+// imame 4 potroshuvacki
+// Site 4 potrsuvaci vo izvesen period kupuvale hrana
+// Sakam da odkrijam vkupno pari kolku dale vo toj period site 4
+
+// Potrosuvas kolekcija
+// -Ime
+// -cena-
+// -ime na produktor
+// -vreme
+// $group: {
+//   _id: null,
+//   Totalpotrsul: { $sum: '$cena'  },
+// },
+
+//produkti
+//-cena
+//-kupen od nekoj
+//-kategorija
+//-vreme
+
+// $group: {
+//   _id: kupenodnekoj,
+//   Totalpotrsul: { $sum: '$cena'  },
+// },
+
+// $group: {
+//   _id: kategorija,
+//   prosecnacena: { $avg: '$cena'  },
+// },
+
+// Kreiranje na veb servis kade sto kje ima vo kolekcija produkti
+// i da se kreirrat 5 random agregacii

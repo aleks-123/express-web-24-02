@@ -1,11 +1,102 @@
 const Movie = require('../pkg/movies/movieSchema');
-//123
-exports.getAll = async (req, res) => {
+
+exports.averageYear = async (req, res) => {
   try {
-    console.log(req.aleksandar);
-    let movies = await Movie.find();
+    const result = await Movie.aggregate([
+      {
+        $group: {
+          _id: null,
+          averageYear: { $avg: '$year' },
+        },
+      },
+    ]);
     res.status(200).json({
       status: 'success',
+
+      data: {
+        result,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+exports.totalYear = async (req, res) => {
+  try {
+    const result = await Movie.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalYear: { $sum: '$year' },
+        },
+      },
+    ]);
+    res.status(200).json({
+      status: 'success',
+
+      data: {
+        result,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+exports.numberPerGenre = async (req, res) => {
+  try {
+    const result = await Movie.aggregate([
+      {
+        $group: {
+          _id: '$genre',
+          numberPerGenre: { $sum: 1 },
+        },
+      },
+    ]);
+    res.status(200).json({
+      status: 'success',
+
+      data: {
+        result,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+exports.getAll = async (req, res) => {
+  try {
+    // console.log(req.query);
+    //prvo kje napravime kopija od objektot req.query
+    const queryObj = { ...req.query };
+
+    let queryString = JSON.stringify(queryObj);
+    //gt, gte, lt, lte
+
+    queryString = queryString.replace(
+      /\b(gte|gt|lte|lt)\b/g,
+      (match) => `$${match}`
+    );
+
+    const query = JSON.parse(queryString);
+    console.log(query);
+    let movies = await Movie.find(query);
+
+    res.status(200).json({
+      status: 'success',
+      total: movies.length,
+
       data: {
         movies,
       },
@@ -108,5 +199,26 @@ exports.getByUser = async (req, res) => {
     res.status(201).json(mineMovies);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+exports.replace = async (req, res) => {
+  try {
+    const movie = await Movie.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+      overwrite: true,
+    });
+    res.status(200).json({
+      status: 'success',
+      data: {
+        movie,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
   }
 };
