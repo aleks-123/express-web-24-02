@@ -52,7 +52,7 @@ app.post('/api/v1/login', auth.login);
 app.get('/movies', movies.getAll);
 app.get('/movies/:id', movies.getOne);
 app.post('/movies', movies.create);
-app.patch('/movies/:id', movies.update);
+app.patch('/movies/:id', movies.uploadMoviePhoto, movies.update);
 app.delete('/movies/:id', movies.delete);
 app.put('/movies/:id', movies.replace);
 // Agregacki ruti

@@ -21,6 +21,7 @@ const movieSchema = new mongoose.Schema({
     type: String,
     default: 'default.jpg',
   },
+
   author: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
