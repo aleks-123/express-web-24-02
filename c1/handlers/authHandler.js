@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../pkg/users/userSchema');
 const bcrypt = require('bcryptjs');
 const { promisify } = require('util');
+const crypto = require('crypto');
+const sendEmail = require('./emailHandler');
 
 exports.signup = async (req, res) => {
   try {
@@ -150,3 +152,51 @@ exports.restrict = (...roles) => {
     next();
   };
 };
+
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    // 1) Da go pronajdime korisnikot so pomosh na negoviot meail
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).send('This user doesnt exist');
+    }
+    // 2) Generiranje na resetriacki token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    // 3) Zapishuvanje na resetirackiot token vo korisickiot dokument vo data baza
+    user.passwordResetToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    user.passwordResetExpires = Date.now() + 30 * 60 * 1000;
+    await user.save({ validateBeforeSave: false });
+
+    // 4) da ispratime link do korisnkickot email
+    // http://127.0.0.1:10000/resetPassword/65cfc9e8451e7d0aeb44c01e
+    const resetUrl = `${req.protocol}://${req.get(
+      'host'
+    )}/resetPassword/${resetToken}`;
+
+    const message = `Ja zaboravivte vashata lozinka, ve molime iskorestete Patch request so vashata nova lozinka na ova ur ${resetUrl}`;
+
+    await sendEmail({
+      email: user.email,
+      subject: 'URGENT!!! Restirajte lozinka za vreme od 30 min',
+      message: message,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Token sent to email!',
+    });
+  } catch (err) {
+    return res.status(500).send('Failed to send email to your adress');
+  }
+};
+
+//? pri sekoe registrianje (kreiranje na nov korisnik), nashiot servis da isprakja mail so vi blagodaram za registracijata na nashata platforma, Iskoristete kodot 8mart za da dobiete popust na nashite proizvodi
+
+//? Da skreira forgotPassword na tviter aplikacijata
+//? Pri sekoja registracija da se isprakja Vi blagodaram za kreiranot profil
+//? Pri patch metoda na nekoj post ama samo ako ima i slika vo patchot - da se isprati mail so nekakva sodrzina test test test.

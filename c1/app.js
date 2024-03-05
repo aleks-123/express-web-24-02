@@ -48,6 +48,8 @@ app.use(
 
 app.post('/api/v1/signup', auth.signup);
 app.post('/api/v1/login', auth.login);
+app.post('/forgotPassword', auth.forgotPassword);
+app.patch('/resetPassword/:token');
 
 app.get('/movies', movies.getAll);
 app.get('/movies/:id', movies.getOne);

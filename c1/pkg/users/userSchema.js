@@ -36,6 +36,8 @@ const userSchema = new mongoose.Schema({
   // albumSliki: [{
   //   type: String,
   // }],
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 userSchema.pre('save', async function (next) {
