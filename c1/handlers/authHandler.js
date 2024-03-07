@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const { promisify } = require('util');
 const crypto = require('crypto');
 const sendEmail = require('./emailHandler');
+const sendMailGun = require('./mailgun');
 
 exports.signup = async (req, res) => {
   try {
@@ -33,6 +34,12 @@ exports.signup = async (req, res) => {
       ),
       secure: false,
       httpOnly: true,
+    });
+
+    await sendMailGun({
+      email: newUser.email,
+      subject: 'Vi blagodarime na registracijata',
+      message: 'testtestetes',
     });
 
     //!Isprakajnje na token zaedno so se korisnicki informacii
@@ -180,7 +187,23 @@ exports.forgotPassword = async (req, res, next) => {
 
     const message = `Ja zaboravivte vashata lozinka, ve molime iskorestete Patch request so vashata nova lozinka na ova ur ${resetUrl}`;
 
+    const htmlMessage = `
+      <div  style="text-align: center;">
+        <h2 style="color: blue">Dali go imate zaboraveno vashiot email</h2>
+        <p style="color: #005;">Ako pobaravte resetiracki link, ve molam klikente linkot shto sleduva</p>
+        <a style="background-color: #0056b3;  color: #fff; padding: 10px 30px; text-decoration:none; display: inline-block; border-radius: 5px" href="${resetUrl}">Reset Password</a>
+        <p>URGENTNOOOO!!! IMATE SAMO 30 MINUTI POBRZAJTE</p>
+      </div>
+    `;
+
     await sendEmail({
+      email: user.email,
+      subject: 'URGENT!!! Restirajte lozinka za vreme od 30 min',
+      message: message,
+      html: htmlMessage,
+    });
+
+    await sendMailGun({
       email: user.email,
       subject: 'URGENT!!! Restirajte lozinka za vreme od 30 min',
       message: message,
@@ -189,6 +212,49 @@ exports.forgotPassword = async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       message: 'Token sent to email!',
+    });
+  } catch (err) {
+    return res.status(500).send('Failed to send email to your adress');
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    // 1) Da go dobieme korisnikot dokument ili korisnikot sto go ima toj token
+    const token = req.params.token;
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+    // 2) I sega proveruvame vo slucaj da ne go pronajde korisnikot
+    if (!user) {
+      // return res.status(400).send('Tokenot e istencen');
+      throw new Error('Tokenot e istencen');
+    }
+
+    // 3) Promena na korisnickiot lozinka
+    user.password = req.body.password;
+    user.passwordResetExpires = undefined;
+    user.passwordResetToken = undefined;
+    await user.save();
+    // 4) opcionalno odkako se premnila lozinkata, generirame nov token i mu go isprakjame na korisnikot
+    const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES,
+    });
+
+    res.cookie('jwt', jwtToken, {
+      expires: new Date(
+        Date.now() + process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000
+      ),
+      secure: false,
+      httpOnly: true,
+    });
+
+    res.status(201).json({
+      status: 'success',
+      token: jwtToken,
     });
   } catch (err) {
     return res.status(500).send('Failed to send email to your adress');

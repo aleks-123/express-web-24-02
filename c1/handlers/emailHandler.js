@@ -36,8 +36,8 @@ const sendMail = async (options) => {
     to: options.email,
     subject: options.subject,
     text: options.message,
+    html: options.html || options.message,
   };
-
   // 3) Da go ispratime emaijlot
   // ova kje ni isprati promis
   await transporter.sendMail(mailOptions);
