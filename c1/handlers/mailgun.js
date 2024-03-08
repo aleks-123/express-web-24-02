@@ -34,3 +34,5 @@ module.exports = sendMailGun;
 //   })
 //   .then((msg) => console.log(msg)) // logs response data
 //   .catch((err) => console.log(err)); // logs any error`;
+
+//! Ovaa aplikacija sto ja rabotime na chasov da vi funkcionira na site!!!!!!!!!!
